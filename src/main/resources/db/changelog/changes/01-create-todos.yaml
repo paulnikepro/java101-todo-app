@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: "paulnike"
+      changes:
+        - createTable:
+            tableName: "todos"
+            columns:
+              - column:
+                  name: "id"
+                  type: "BIGINT"
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: "title"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "description"
+                  type: "VARCHAR(1000)"
+              - column:
+                  name: "completed"
+                  type: "BOOLEAN"
+                  defaultValueBoolean: false
+              - column:
+                  name: "created_at"
+                  type: "TIMESTAMP"
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "updated_at"
+                  type: "TIMESTAMP"
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 2
+      author: "paulnike"
+      changes:
+        - addUniqueConstraint:
+            tableName: "todos"
+            columnNames: "title"
+            constraintName: "uq_todos_title"
