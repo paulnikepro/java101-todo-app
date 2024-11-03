@@ -63,9 +63,6 @@ public class Todo {
     @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskHistory> taskHistories = new ArrayList<>();
 
-
-
-    //@Column(nullable = false, columnDefinition = "TINYINT(1)")
     @Column(nullable = false)
     private boolean isDeleted = false;
 }

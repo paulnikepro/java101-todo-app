@@ -22,13 +22,14 @@ public record TodoCreateDto(
 
         Priority priority,
 
+        @NotNull(message = "Status is required")
         Status status
 ) {
         public Priority priority() {
                 return priority != null ? priority : Priority.MEDIUM;
         }
 
-        public Status status() {
-                return status != null ? status : Status.PENDING;
-        }
+//        public Status status() {
+//                return status != null ? status : Status.PENDING;
+//        }
 }

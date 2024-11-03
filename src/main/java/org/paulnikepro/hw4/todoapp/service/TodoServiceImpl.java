@@ -8,6 +8,7 @@ import org.paulnikepro.hw4.todoapp.model.TaskHistory;
 import org.paulnikepro.hw4.todoapp.model.Todo;
 import org.paulnikepro.hw4.todoapp.mapper.TaskHistoryMapper;
 import org.paulnikepro.hw4.todoapp.mapper.TodoMapper;
+import org.paulnikepro.hw4.todoapp.model.enums.Status;
 import org.paulnikepro.hw4.todoapp.repository.TaskHistoryRepository;
 import org.paulnikepro.hw4.todoapp.repository.TodoRepository;
 import jakarta.transaction.Transactional;
@@ -31,7 +32,7 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public TodoResponseDto save(TodoCreateDto todoCreateDto) {
         Todo todo = todoMapper.toEntity(todoCreateDto);
-        todo.setStatus(todoCreateDto.status());
+        todo.setStatus(Status.PENDING);
         todo.setPriority(todoCreateDto.priority());
         todo.setUserId(1L);
         todo.setCreatedDate(LocalDateTime.now());
@@ -77,28 +78,6 @@ public class TodoServiceImpl implements TodoService {
         Todo savedTodo = todoRepository.save(existingTodo);
         return todoMapper.toResponseDto(savedTodo);
     }
-
-//    @Override
-//    public void delete(Long id) {
-//        Todo todo = todoRepository.findById(id)
-//                .orElseThrow(() -> new ResourceNotFoundException("Todo with id " + id + " not found."));
-//
-//        checkSoftDelete(todo, "Todo with id " + id + " is already deleted.");
-//
-//        // Set deletion flag and update date
-//        todo.setDeleted(true);
-//        todo.setUpdatedDate(LocalDateTime.now());
-//        todoRepository.save(todo);
-//
-//        // Record deletion in history
-//        TaskHistory history = new TaskHistory();
-//        history.setTodo(todo);
-//        history.setOldState(todo.getStatus().toString());
-//        history.setNewState("DELETED");
-//        history.setChangeDate(LocalDateTime.now());
-//        history.setChangedBy("User");
-//        taskHistoryRepository.save(history);
-//    }
 
     @Override
     @Transactional
