@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -28,6 +29,37 @@ public class TodoServiceImpl implements TodoService {
     private final TodoMapper todoMapper;
     private final TaskHistoryRepository taskHistoryRepository;
     private final TaskHistoryMapper taskHistoryMapper;
+
+    @Override
+    public void deleteById(Long id) {
+        todoRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return todoRepository.existsById(id);
+    }
+
+    public TodoResponseDto findById(Long id) {
+        Optional<Todo> todoOptional = todoRepository.findById(id);
+        // Implement this method to convert Todo to TodoResponseDto
+        // Or throw an exception, depending on your preference
+        return todoOptional.map(this::convertToDto).orElse(null);
+    }
+
+    private TodoResponseDto convertToDto(Todo todo) {
+        return new TodoResponseDto(
+                todo.getId(),
+                todo.getTitle(),
+                todo.getDescription(),
+                todo.getDueDate(),
+                todo.getPriority(),
+                todo.getStatus(),
+                todo.getCreatedDate(),
+                todo.getUpdatedDate(),
+                todo.getUserId()
+        );
+    }
 
     @Override
     public TodoResponseDto save(TodoCreateDto todoCreateDto) {

@@ -8,6 +8,11 @@ import org.paulnikepro.hw4.todoapp.dto.TodoUpdateDto;
 import java.util.List;
 
 public interface TodoService {
+
+    boolean existsById(Long id);
+
+    void deleteById(Long id);
+
     TodoResponseDto save(TodoCreateDto todoCreateDto);
 
     TodoResponseDto update(Long id, TodoUpdateDto todoUpdateDto);
