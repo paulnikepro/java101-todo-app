@@ -41,8 +41,7 @@ public class TodoServiceImpl implements TodoService {
 
     public TodoResponseDto findById(Long id) {
         Optional<Todo> todoOptional = todoRepository.findById(id);
-        // Implement this method to convert Todo to TodoResponseDto
-        // Or throw an exception, depending on your preference
+
         return todoOptional.map(this::convertToDto).orElse(null);
     }
 
