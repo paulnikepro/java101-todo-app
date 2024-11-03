@@ -2,6 +2,7 @@ package org.paulnikepro.hw4.todoapp.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,11 +10,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    // Handle illegal argument exceptions
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex) {
         LOGGER.warn("IllegalArgumentException: {}", ex.getMessage());
@@ -21,14 +25,21 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDto(ex.getMessage(), "ILLEGAL_ARGUMENT"));
     }
 
+    // Handle validation exceptions
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
         LOGGER.warn("Validation error: {}", ex.getMessage());
-        String errorMessage = "Validation failed: " + ex.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDto(errorMessage, "VALIDATION_ERROR"));
+
+        String errorMessages = ex.getBindingResult().getAllErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining("; "));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Validation failed: " + errorMessages);
+
     }
 
+    // Handle response status exceptions
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponseDto> handleResponseStatusException(ResponseStatusException ex) {
         LOGGER.error("ResponseStatusException: {}", ex.getMessage());
@@ -36,6 +47,7 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDto(ex.getReason(), "RESPONSE_STATUS_EXCEPTION"));
     }
 
+    // Handle any other unhandled exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGeneralException(Exception ex) {
         LOGGER.error("Unhandled exception: {}", ex.getMessage(), ex);
