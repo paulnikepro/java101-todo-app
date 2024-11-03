@@ -28,8 +28,4 @@ public record TodoCreateDto(
         public Priority priority() {
                 return priority != null ? priority : Priority.MEDIUM;
         }
-
-//        public Status status() {
-//                return status != null ? status : Status.PENDING;
-//        }
 }
