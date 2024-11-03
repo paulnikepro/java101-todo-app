@@ -30,7 +30,7 @@ public class TodoControllerIntegrationTest extends BaseIntegrationTest{
 
     @Test
     void testCreateTodo() {
-        Map<String, Object> requestBody = createTodoRequest("Test Todo", "This is a test todo item.", LocalDateTime.now().plusDays(1), "HIGH", "NEW");
+        Map<String, Object> requestBody = createTodoRequest("Test Todo", "This is a test todo item.", LocalDateTime.now().plusDays(1), "HIGH", "PENDING");
 
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, createHeaders());
 
@@ -45,7 +45,7 @@ public class TodoControllerIntegrationTest extends BaseIntegrationTest{
     @Test
     void testUpdateTodo() {
 
-        Map<String, Object> createRequestBody = createTodoRequest("Initial Todo", "Description", LocalDateTime.now().plusDays(1), "HIGH", "NEW");
+        Map<String, Object> createRequestBody = createTodoRequest("Initial Todo", "Description", LocalDateTime.now().plusDays(1), "HIGH", "PENDING");
         var createResponse = restTemplate.postForEntity("/todos", createRequestBody, Map.class);
         long todoId = Long.parseLong(Objects.requireNonNull(createResponse.getBody()).get("id").toString());
 
@@ -69,8 +69,8 @@ public class TodoControllerIntegrationTest extends BaseIntegrationTest{
 
     @Test
     void testDeleteTodo() {
-        // First, create a Todo
-        Map<String, Object> requestBody = createTodoRequest("Todo to delete", "This todo will be deleted.", LocalDateTime.now().plusDays(1), "HIGH", "NEW");
+        // First, create an entity
+        Map<String, Object> requestBody = createTodoRequest("Todo to delete", "This todo will be deleted.", LocalDateTime.now().plusDays(1), "HIGH", "PENDING");
         var createResponse = restTemplate.postForEntity("/todos", requestBody, Map.class);
         long todoId = Long.parseLong(Objects.requireNonNull(createResponse.getBody()).get("id").toString());
 
@@ -80,7 +80,7 @@ public class TodoControllerIntegrationTest extends BaseIntegrationTest{
         // Assert the response for deletion
         assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
 
-        // Assert that the todo is actually deleted
+        // Assert that the entity is actually deleted
         var getResponse = restTemplate.getForEntity("/todos/" + todoId, Map.class);
         assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
     }
@@ -88,8 +88,8 @@ public class TodoControllerIntegrationTest extends BaseIntegrationTest{
 
     @Test
     void testGetTaskHistory() {
-        // First, create a Todo with a status
-        Map<String, Object> requestBody = createTodoRequest("Todo for history", "This todo will have history.", LocalDateTime.now().plusDays(1), "HIGH", "NEW");
+        // First, create an entity with a status
+        Map<String, Object> requestBody = createTodoRequest("Todo for history", "This todo will have history.", LocalDateTime.now().plusDays(1), "HIGH", "PENDING");
         var createResponse = restTemplate.postForEntity("/todos", requestBody, Map.class);
         long todoId = Long.parseLong(Objects.requireNonNull(createResponse.getBody()).get("id").toString());
 
@@ -107,7 +107,7 @@ public class TodoControllerIntegrationTest extends BaseIntegrationTest{
         requestBody.put("description", description);
         requestBody.put("dueDate", dueDate);
         requestBody.put("priority", priority);
-        requestBody.put("status", status); // Include status here
+        requestBody.put("status", status);
         return requestBody;
     }
 
