@@ -6,7 +6,6 @@ import org.paulnikepro.hw4.todoapp.dto.TodoResponseDto;
 import org.paulnikepro.hw4.todoapp.dto.TodoUpdateDto;
 import org.paulnikepro.hw4.todoapp.model.TaskHistory;
 import org.paulnikepro.hw4.todoapp.model.Todo;
-import org.paulnikepro.hw4.todoapp.model.enums.Status;
 import org.paulnikepro.hw4.todoapp.mapper.TaskHistoryMapper;
 import org.paulnikepro.hw4.todoapp.mapper.TodoMapper;
 import org.paulnikepro.hw4.todoapp.repository.TaskHistoryRepository;
@@ -64,7 +63,8 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public TodoResponseDto save(TodoCreateDto todoCreateDto) {
         Todo todo = todoMapper.toEntity(todoCreateDto);
-        todo.setStatus(Status.PENDING);
+        todo.setStatus(todoCreateDto.status());
+        todo.setPriority(todoCreateDto.priority());
         todo.setUserId(1L);
         todo.setCreatedDate(LocalDateTime.now());
         todo.setUpdatedDate(LocalDateTime.now());
@@ -110,25 +110,50 @@ public class TodoServiceImpl implements TodoService {
         return todoMapper.toResponseDto(savedTodo);
     }
 
+//    @Override
+//    public void delete(Long id) {
+//        Todo todo = todoRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Todo with id " + id + " not found."));
+//
+//        checkSoftDelete(todo, "Todo with id " + id + " is already deleted.");
+//
+//        // Set deletion flag and update date
+//        todo.setDeleted(true);
+//        todo.setUpdatedDate(LocalDateTime.now());
+//        todoRepository.save(todo);
+//
+//        // Record deletion in history
+//        TaskHistory history = new TaskHistory();
+//        history.setTodo(todo);
+//        history.setOldState(todo.getStatus().toString());
+//        history.setNewState("DELETED");
+//        history.setChangeDate(LocalDateTime.now());
+//        history.setChangedBy("User");
+//        taskHistoryRepository.save(history);
+//    }
+
     @Override
+    @Transactional
     public void delete(Long id) {
+        // Fetch the Todo item by ID, or throw an exception if not found
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Todo with id " + id + " not found."));
 
+        // Check if the Todo is already soft-deleted
         checkSoftDelete(todo, "Todo with id " + id + " is already deleted.");
 
-        // Set deletion flag and update date
+        // Set the deletion flag and update the date
         todo.setDeleted(true);
         todo.setUpdatedDate(LocalDateTime.now());
         todoRepository.save(todo);
 
-        // Record deletion in history
+        // Record the deletion in the task history
         TaskHistory history = new TaskHistory();
         history.setTodo(todo);
         history.setOldState(todo.getStatus().toString());
         history.setNewState("DELETED");
         history.setChangeDate(LocalDateTime.now());
-        history.setChangedBy("User");
+        history.setChangedBy("User"); // Or replace with actual user if available
         taskHistoryRepository.save(history);
     }
 

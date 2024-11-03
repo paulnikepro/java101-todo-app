@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 import java.time.LocalDateTime;
 import org.paulnikepro.hw4.todoapp.model.enums.Priority;
+import org.paulnikepro.hw4.todoapp.model.enums.Status;
 
 public record TodoCreateDto(
 
@@ -19,5 +20,15 @@ public record TodoCreateDto(
         @NotNull(message = "Due date is required")
         LocalDateTime dueDate,
 
-        Priority priority
-) { }
+        Priority priority,
+
+        Status status
+) {
+        public Priority priority() {
+                return priority != null ? priority : Priority.MEDIUM;
+        }
+
+        public Status status() {
+                return status != null ? status : Status.PENDING;
+        }
+}

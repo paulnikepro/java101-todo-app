@@ -44,10 +44,10 @@ public class Todo {
     private LocalDateTime dueDate;
 
     @Enumerated(EnumType.STRING)
-    private Priority priority;
+    private Priority priority = Priority.MEDIUM;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private Status status = Status.PENDING;
 
     // When the task was created
     private LocalDateTime createdDate;
