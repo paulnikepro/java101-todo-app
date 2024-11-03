@@ -19,15 +19,14 @@ public class GlobalExceptionHandler {
 
     // Handle illegal argument exceptions
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
         LOGGER.warn("IllegalArgumentException: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDto(ex.getMessage(), "ILLEGAL_ARGUMENT"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     // Handle validation exceptions
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
         LOGGER.warn("Validation error: {}", ex.getMessage());
 
         String errorMessages = ex.getBindingResult().getAllErrors()
@@ -41,17 +40,15 @@ public class GlobalExceptionHandler {
 
     // Handle response status exceptions
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ErrorResponseDto> handleResponseStatusException(ResponseStatusException ex) {
+    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
         LOGGER.error("ResponseStatusException: {}", ex.getMessage());
-        return ResponseEntity.status(ex.getStatusCode())
-                .body(new ErrorResponseDto(ex.getReason(), "RESPONSE_STATUS_EXCEPTION"));
+        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
     }
 
     // Handle any other unhandled exceptions
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGeneralException(Exception ex) {
+    public ResponseEntity<String> handleGeneralException(Exception ex) {
         LOGGER.error("Unhandled exception: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponseDto("An unexpected error occurred. Please try again later.", "UNEXPECTED_ERROR"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred. Please try again later.");
     }
 }
