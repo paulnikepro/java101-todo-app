@@ -62,11 +62,3 @@ databaseChangeLog:
                   type: "BIGINT"
                   constraints:
                     nullable: false
-  - changeSet:
-      id: 2
-      author: "paulnike"
-      changes:
-        - addUniqueConstraint:
-            tableName: "todos"
-            columnNames: "title"
-            constraintName: "uq_todos_title"

@@ -4,7 +4,9 @@ import org.paulnikepro.hw4.todoapp.dto.TodoCreateDto;
 import org.paulnikepro.hw4.todoapp.dto.TodoResponseDto;
 import org.paulnikepro.hw4.todoapp.dto.TodoUpdateDto;
 import org.paulnikepro.hw4.todoapp.dto.TaskHistoryResponseDto;
+import org.paulnikepro.hw4.todoapp.exception.TodoNotFoundException;
 import org.paulnikepro.hw4.todoapp.service.TodoServiceImpl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -33,12 +36,11 @@ public class TodoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TodoResponseDto> getTodoById(@PathVariable Long id) {
-        TodoResponseDto todoResponse = todoService.findById(id); // Assuming this method exists in your service
-        if (todoResponse != null) {
-            return ResponseEntity.ok(todoResponse); // Return 200 OK with the todo details
-        } else {
-            return ResponseEntity.notFound().build(); // Return 404 Not Found if the todo does not exist
+        TodoResponseDto todoResponse = todoService.findById(id);
+        if (todoResponse == null) {
+            throw new TodoNotFoundException(id);
         }
+        return ResponseEntity.ok(todoResponse);
     }
 
     @PutMapping("/{id}")
@@ -47,19 +49,10 @@ public class TodoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTodo(@PathVariable Long id) {
-        if (!todoService.existsById(id)) {
-            return ResponseEntity.notFound().build(); // Handle not found case
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTodo(@PathVariable Long id) {
         todoService.deleteById(id);
-        return ResponseEntity.noContent().build(); // Return 204 No Content
     }
-
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteTodo(@PathVariable Long id) {
-//        todoService.deleteById(id);
-//        return ResponseEntity.noContent().build(); // 204 No Content
-//    }
 
     @GetMapping("/{id}/history")
     public List<TaskHistoryResponseDto> getTaskHistory(@PathVariable Long id) {

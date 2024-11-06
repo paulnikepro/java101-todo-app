@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.paulnikepro.hw4.todoapp.dto.TodoCreateDto;
 import org.paulnikepro.hw4.todoapp.dto.TodoResponseDto;
 import org.paulnikepro.hw4.todoapp.dto.TodoUpdateDto;
+import org.paulnikepro.hw4.todoapp.exception.ResourceNotFoundException;
 import org.paulnikepro.hw4.todoapp.model.TaskHistory;
 import org.paulnikepro.hw4.todoapp.model.Todo;
 import org.paulnikepro.hw4.todoapp.mapper.TaskHistoryMapper;
@@ -13,12 +14,10 @@ import org.paulnikepro.hw4.todoapp.repository.TaskHistoryRepository;
 import org.paulnikepro.hw4.todoapp.repository.TodoRepository;
 import jakarta.transaction.Transactional;
 import org.paulnikepro.hw4.todoapp.dto.TaskHistoryResponseDto;
-import org.paulnikepro.hw4.todoapp.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -32,6 +31,8 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public void deleteById(Long id) {
+        todoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Todo item with id " + id + " not found"));
         todoRepository.deleteById(id);
     }
 
@@ -41,9 +42,10 @@ public class TodoServiceImpl implements TodoService {
     }
 
     public TodoResponseDto findById(Long id) {
-        Optional<Todo> todoOptional = todoRepository.findById(id);
+        Todo todo = todoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Todo item with id " + id + " not found"));
 
-        return todoOptional.map(this::convertToDto).orElse(null);
+        return convertToDto(todo);
     }
 
     private TodoResponseDto convertToDto(Todo todo) {
@@ -95,7 +97,7 @@ public class TodoServiceImpl implements TodoService {
         todoMapper.updateEntityFromDto(todoUpdateDto, existingTodo);
         existingTodo.setUpdatedDate(LocalDateTime.now());
 
-        // Create history entry
+        // Create history entry if the state has changed
         if (!oldState.equals(existingTodo.toString())) {
             TaskHistory history = new TaskHistory();
             history.setTodo(existingTodo);
@@ -117,13 +119,7 @@ public class TodoServiceImpl implements TodoService {
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Todo with id " + id + " not found."));
 
-        // Check if the Todo is already soft-deleted
-        checkSoftDelete(todo, "Todo with id " + id + " is already deleted.");
-
-        // Set the deletion flag and update the date
-        todo.setDeleted(true);
-        todo.setUpdatedDate(LocalDateTime.now());
-        todoRepository.save(todo);
+        todoRepository.delete(todo);
 
         // Record the deletion in the task history
         TaskHistory history = new TaskHistory();
@@ -131,7 +127,7 @@ public class TodoServiceImpl implements TodoService {
         history.setOldState(todo.getStatus().toString());
         history.setNewState("DELETED");
         history.setChangeDate(LocalDateTime.now());
-        history.setChangedBy("User"); // Or replace with actual user if available
+        history.setChangedBy("User");
         taskHistoryRepository.save(history);
     }
 
@@ -140,19 +136,11 @@ public class TodoServiceImpl implements TodoService {
         Todo todo = todoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Todo with id " + id + " not found."));
 
-        checkSoftDelete(todo, "Cannot view history of a deleted Todo.");
-
         // Fetch task history for the given todo id
         List<TaskHistory> historyList = taskHistoryRepository.findByTodoId(id);
 
         return historyList.stream()
                 .map(taskHistoryMapper::toResponseDto)
                 .collect(Collectors.toList());
-    }
-
-    private void checkSoftDelete(Todo todo, String errorMessage) {
-        if (todo.isDeleted()) {
-            throw new IllegalStateException(errorMessage);
-        }
     }
 }
